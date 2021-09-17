@@ -9,7 +9,7 @@ const saltRounds = 10;
 router.get("/", async (req, res) => {
   await Restaurant.find()
     .then((restaurants) => {
-      if (restaurants)
+      if (restaurants.length > 0)
         res.send({
           success: true,
           massae: "Data found",
