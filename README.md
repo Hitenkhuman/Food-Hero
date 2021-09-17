@@ -87,7 +87,7 @@ An android application for waste food management.
 }
 ```
 
-#### Get item
+#### Post item
 
 ```http
   POST /restaurants/add
