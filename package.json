@@ -1,0 +1,19 @@
+{
+  "name": "rest-apis-project",
+  "version": "1.0.0",
+  "description": "REST apis for waste food managment app",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "express": "^4.17.1",
+    "express-fileupload": "^1.2.1",
+    "moment": "^2.29.1",
+    "mongodb": "^3.6.10",
+    "mongoose": "^5.13.2"
+  }
+}
