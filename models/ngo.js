@@ -28,11 +28,11 @@ const ngoSchema = new mongoose.Schema({
     require: true,
     default: "ngo.png",
   },
-  openingtime: {
+  opening_time: {
     type: String,
     require: true,
   },
-  closingtime: {
+  closing_time: {
     type: String,
     require: true,
   },
@@ -47,6 +47,9 @@ const ngoSchema = new mongoose.Schema({
   address: {
     type: String,
     require: true,
+  },
+  city: {
+    type: String,
   },
   devicetoken: {
     type: String,
@@ -65,6 +68,10 @@ const ngoSchema = new mongoose.Schema({
   verification_status: {
     type: String,
     default: "Pending",
+  },
+  reports: {
+    type: Number,
+    default: 0,
   },
 });
 //ngoSchema.index({ email: 1, mobile: 1 }, { unique: true });

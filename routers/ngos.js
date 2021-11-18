@@ -7,13 +7,14 @@ const config = require("../config");
 const saltRounds = 10;
 
 router.get("/", async (req, res) => {
-  await Ngo.find()
+  await Ngo.find({ verification_status: "Verified" })
     .then((ngos) => {
-      if (ngos) res.json({ success: true, massae: "Data found", data: ngos });
+      if (ngos) res.json({ success: true, massage: "Data found", data: ngos });
       else
         res.send({
           success: false,
-          massae: "No Ngos are available in database",
+          massage: "No Ngos are available in database",
+          data: null,
         });
     })
     .catch((error) => {
@@ -21,6 +22,28 @@ router.get("/", async (req, res) => {
       res.status(500).send({
         success: false,
         massage: error.massage || "Something went wrong while retrieving ngos",
+        data: null,
+      });
+    });
+});
+
+router.get("/verification", async (req, res) => {
+  await Ngo.find({ verification_status: "Pending" })
+    .then((ngos) => {
+      if (ngos) res.json({ success: true, massage: "Data found", data: ngos });
+      else
+        res.send({
+          success: false,
+          massage: "No Ngos are available in database",
+          data: null,
+        });
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(500).send({
+        success: false,
+        massage: error.massage || "Something went wrong while retrieving ngos",
+        data: null,
       });
     });
 });
@@ -30,7 +53,7 @@ router.get("/:id", async (req, res) => {
     .then((ngos) => {
       res.send({
         success: true,
-        massae: "Data found",
+        massage: "Data found",
         data: ngos,
       });
     })
@@ -40,6 +63,7 @@ router.get("/:id", async (req, res) => {
         massage:
           error.massage ||
           "Something went wrong while retrieving ngos please check ngo id",
+        data: null,
       });
       console.log(error);
     });
@@ -50,15 +74,15 @@ router.get("/mobile/:mobile", async (req, res) => {
     .then((ngo) => {
       if (ngo)
         res.send({
-          code: 400,
-          status: "Occupied",
+          success: false,
           massage: "Try with diffrent number",
+          data: null,
         });
       else {
         res.send({
-          code: 100,
-          status: "Available",
-          massage: "Ok",
+          success: true,
+          massage: "Available",
+          data: null,
         });
       }
     })
@@ -68,6 +92,7 @@ router.get("/mobile/:mobile", async (req, res) => {
         massage:
           error.massage ||
           "Something went wrong while retrieving ngos please check ngo id",
+        data: null,
       });
       console.log(error);
     });
@@ -78,15 +103,15 @@ router.get("/email/:emailid", async (req, res) => {
     .then((ngo) => {
       if (ngo)
         res.send({
-          code: 400,
-          status: "Occupied",
+          success: false,
           massage: "Try with diffrent email id",
+          data: null,
         });
       else {
         res.send({
-          code: 100,
-          status: "Available",
-          massage: "Ok",
+          success: true,
+          massage: "Available",
+          data: null,
         });
       }
     })
@@ -96,6 +121,7 @@ router.get("/email/:emailid", async (req, res) => {
         massage:
           error.massage ||
           "Something went wrong while retrieving ngos please check ngo id",
+        data: null,
       });
       console.log(error);
     });
@@ -108,13 +134,14 @@ router.get("/device/all", async (req, res) => {
       if (ngo) {
         res.send({
           success: true,
-          massae: "Data found",
+          massage: "Data found",
           data: ngo,
         });
       } else {
         res.status(100).json({
           success: false,
           massage: "No ngo are available",
+          data: null,
         });
       }
     })
@@ -124,6 +151,7 @@ router.get("/device/all", async (req, res) => {
         massage:
           error.massage ||
           "Something went wrong while retrieving token please check ngo id",
+        data: null,
       });
       console.log(error);
     });
@@ -146,6 +174,7 @@ router.get("/device/:id", async (req, res) => {
         res.status(100).json({
           success: false,
           massage: "No ngo are available",
+          data: null,
         });
       }
     })
@@ -155,6 +184,7 @@ router.get("/device/:id", async (req, res) => {
         massage:
           error.massage ||
           "Something went wrong while retrieving token please check ngo id",
+        data: null,
       });
       console.log(error);
     });
@@ -175,6 +205,7 @@ router.get("/status/:id", async (req, res) => {
         res.status(100).json({
           success: false,
           massage: "Not Found",
+          data: null,
         });
       }
     })
@@ -184,6 +215,7 @@ router.get("/status/:id", async (req, res) => {
         massage:
           error.massage ||
           "Something went wrong while retrieving token please check ngo id",
+        data: null,
       });
       console.log(error);
     });
@@ -195,7 +227,7 @@ router.get("/profileimg/:id", async (req, res) => {
     .then((ngos) => {
       res.send({
         success: true,
-        massae: "Data found",
+        massage: "Data found",
         data: {
           _id: ngos._id,
           imgurl: config.img_path + ngos.imgurl,
@@ -208,6 +240,7 @@ router.get("/profileimg/:id", async (req, res) => {
         massage:
           error.massage ||
           "Something went wrong while retrieving Restaurants please check restaurant id",
+        data: null,
       });
       console.log(error);
     });
@@ -215,19 +248,21 @@ router.get("/profileimg/:id", async (req, res) => {
 
 router.post("/add", async (req, res) => {
   console.log("post req");
+  let filename = "";
   if (req.files.img) {
     if (!req.files || Object.keys(req.files).length === 0) {
       return res.status(400).send("No files were uploaded.");
     }
 
     const target_file = req.files.img;
-    const filename = req.body.authid + "_profile_pic_" + target_file.name;
+    filename = req.body.authid + "_profile_pic_" + target_file.name;
     const uploadPath = "./static/profile_pic/" + filename;
     target_file.mv(uploadPath, (err) => {
       if (err)
         res.send({
           success: false,
           massage: "Issues with file",
+          data: null,
         });
     });
   }
@@ -242,13 +277,14 @@ router.post("/add", async (req, res) => {
       email: req.body.email,
       password: hash,
       imgurl: filename,
-      openingtime: req.body.openingtime,
-      closingtime: req.body.closingtime,
+      opening_time: req.body.opening_time,
+      closing_time: req.body.closing_time,
       state: req.body.state,
       district: req.body.district,
       address: req.body.address,
       devicetoken: req.body.devicetoken,
       authid: req.body.authid,
+      city: req.body.city,
     });
     ngo
       .save()
@@ -262,8 +298,9 @@ router.post("/add", async (req, res) => {
       .catch((error) => {
         res.status(500).send({
           success: false,
-          message:
+          massage:
             error.message || "Some error occurred while adding the Restaurant.",
+          data: null,
         });
       });
   });
@@ -283,6 +320,7 @@ router.put("/profileimg/:id", async (req, res) => {
       res.send({
         success: false,
         massage: "Issues with file",
+        data: null,
       });
   });
 
@@ -298,6 +336,7 @@ router.put("/profileimg/:id", async (req, res) => {
       res.send({
         success: true,
         massage: "Successfully Updated",
+        data: null,
       });
     })
     .catch((error) => {
@@ -306,6 +345,7 @@ router.put("/profileimg/:id", async (req, res) => {
         massage:
           "Something went wrong while updating please check restaurant id" ||
           error.massage,
+        data: null,
       });
     });
 });
@@ -320,6 +360,7 @@ router.put("/edit/:id", async (req, res) => {
       res.send({
         success: true,
         massage: "Successfully Updated",
+        data: ngo,
       });
     })
     .catch((error) => {
@@ -328,6 +369,63 @@ router.put("/edit/:id", async (req, res) => {
         massage:
           "Something went wrong while updating please check ngo id" ||
           error.massage,
+        data: null,
+      });
+    });
+});
+
+router.put("/verify/:id", async (req, res) => {
+  console.log("put from ngo req");
+  await Ngo.findByIdAndUpdate(
+    req.params.id,
+    { verification_status: "Verified" },
+    {
+      new: true,
+      useFindAndModify: false,
+    }
+  )
+    .then((ngo) => {
+      res.send({
+        success: true,
+        massage: "Successfully Updated",
+        data: [ngo],
+      });
+    })
+    .catch((error) => {
+      res.send({
+        success: false,
+        massage:
+          "Something went wrong while updating please check ngo id" ||
+          error.massage,
+        data: null,
+      });
+    });
+});
+
+router.put("/reject/:id", async (req, res) => {
+  console.log("put from ngo req");
+  await Ngo.findByIdAndUpdate(
+    req.params.id,
+    { verification_status: "Rejected" },
+    {
+      new: true,
+      useFindAndModify: false,
+    }
+  )
+    .then((ngo) => {
+      res.send({
+        success: true,
+        massage: "Successfully Updated",
+        data: [ngo],
+      });
+    })
+    .catch((error) => {
+      res.send({
+        success: false,
+        massage:
+          "Something went wrong while updating please check ngo id" ||
+          error.massage,
+        data: null,
       });
     });
 });
@@ -350,6 +448,7 @@ router.put("/changepassword/:id", async (req, res) => {
         res.send({
           success: true,
           massage: "Successfully Updated",
+          data: null,
         });
       })
       .catch((error) => {
@@ -358,6 +457,7 @@ router.put("/changepassword/:id", async (req, res) => {
           massage:
             "Something went wrong while updating please check restaurant id" ||
             error.massage,
+          data: null,
         });
       });
   });
@@ -378,6 +478,7 @@ router.post("/login", async (req, res) => {
             res.send({
               success: false,
               massage: "Invalid password",
+              data: null,
             });
           }
         });
@@ -385,6 +486,7 @@ router.post("/login", async (req, res) => {
         res.send({
           success: false,
           massage: "Please Signin first",
+          data: null,
         });
       }
     })
@@ -400,6 +502,7 @@ router.delete("/:id", (req, res) => {
       res.send({
         success: true,
         massage: "Successfully Deleted",
+        data: null,
       });
     })
     .catch((error) => {
@@ -408,6 +511,7 @@ router.delete("/:id", (req, res) => {
         massage:
           "Something went wrong while deleting please check ngo id" ||
           error.massage,
+        data: null,
       });
     });
 });

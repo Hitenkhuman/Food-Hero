@@ -23,11 +23,11 @@ const restaurantSchema = new mongoose.Schema({
     require: true,
     default: "default.png",
   },
-  openingtime: {
+  opening_time: {
     type: String,
     require: true,
   },
-  closingtime: {
+  closing_time: {
     type: String,
     require: true,
   },
@@ -38,6 +38,9 @@ const restaurantSchema = new mongoose.Schema({
   district: {
     type: String,
     require: true,
+  },
+  city: {
+    type: String,
   },
   address: {
     type: String,
@@ -56,6 +59,14 @@ const restaurantSchema = new mongoose.Schema({
   joindate: {
     type: Date,
     default: Date.now,
+  },
+  reports: {
+    type: Number,
+    default: 0,
+  },
+  isVerified: {
+    type: Boolean,
+    default: true,
   },
 });
 //restaurantSchema.index({ email: 1, mobile: 1 }, { unique: true });

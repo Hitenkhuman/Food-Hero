@@ -1,13 +1,39 @@
 const express = require("express");
 const router = express.Router();
 const Food = require("../models/food");
-// const Restaurant = require("../models/restaurant");
+const Restaurant = require("../models/restaurant");
 //const { Food, Restaurant } = require("../models/models");
 
 //available food list for ngos
 router.get("/available", async (req, res) => {
-  await Food.find({ status: "Available" })
+  await Food.find({ food_status: "Available" })
     .populate("res_id")
+    .then((foods) => {
+      if (foods)
+        res.send({
+          success: true,
+          massage: "Data Found",
+          data: foods,
+        });
+      else
+        res.status(100).send({
+          success: false,
+          massage: "No Foods are available in database",
+        });
+    })
+    .catch((error) => {
+      res.status(500).send({
+        success: false,
+        massage: error.massage || "Something went wrong while retrieving Foods",
+      });
+    });
+});
+
+router.get("/available/:city", async (req, res) => {
+  await Food.find({ food_status: "Available", city: req.params.city })
+    .populate("res_id")
+    .populate("ngo_id")
+    .populate("requests")
     .then((foods) => {
       if (foods)
         res.send({
@@ -30,9 +56,87 @@ router.get("/available", async (req, res) => {
 });
 
 //food list at particular restaurant
-router.get("/available/:id", async (req, res) => {
-  await Food.find({ res_id: req.params.id, status: "Available" })
+// router.get("/available/:city", async (req, res) => {
+//   console.log("city request");
+//   var response = new Array();
+//   await Restaurant.find({ city: req.params.city })
+//     .then((restaurants) => {
+//       // res.send(restaurants);
+
+//       restaurants.map((element) => {
+//         Food.find({ res_id: element._id, food_status: "Available" })
+//           .populate("res_id")
+//           .populate("ngo_id")
+//           .then((foods) => {
+//             //console.log(foods);
+//             // // if(foods.length>0){}
+//             response.push(foods);
+//           })
+//           .catch((error) => {
+//             res.status(500).send({
+//               success: false,
+//               massage:
+//                 error.massage || "Something went wrong while retrieving Foods",
+//             });
+//           });
+//       });
+//       console.log(response);
+//       if (response) {
+//         res.send({
+//           success: true,
+//           massage: "Data Found",
+//           data: response,
+//         });
+//       }
+//     })
+//     .catch((error) => {
+//       res.status(500).send({
+//         success: false,
+//         massage:
+//           error.massage ||
+//           "Something went wrong while retrieving Restaurants in this city",
+//         data: null,
+//       });
+//       console.log(error);
+//     });
+// });
+
+router.get("/all", async (req, res) => {
+  console.log("all req");
+  await Food.find({ food_status: "Delivered" })
     .populate("res_id")
+    .populate("ngo_id")
+    .then((foods) => {
+      if (foods) {
+        res.send({
+          success: true,
+          massage: "Data Found",
+          data: foods,
+        });
+      } else
+        res.status(100).send({
+          success: false,
+          massage: "No Foods are available in database",
+        });
+    })
+    .catch((error) => {
+      res.status(500).send({
+        success: false,
+        massage: error.massage || "Something went wrong while retrieving Foods",
+      });
+    });
+});
+
+router.get("/ngo/:id/:city", async (req, res) => {
+  console.log("ngo req");
+  await Food.find({
+    ngo_id: req.params.id,
+    food_status: "Available",
+    city: req.params.city,
+    requests: { $ne: req.params.id },
+  })
+    .populate("res_id")
+    .populate("ngo_id")
     .then((foods) => {
       if (foods)
         res.send({
@@ -54,8 +158,10 @@ router.get("/available/:id", async (req, res) => {
     });
 });
 
-router.get("/all", async (req, res) => {
-  await Food.find()
+router.get("/restaurant/:id", async (req, res) => {
+  console.log("ngo req");
+  await Food.find({ res_id: req.params.id, food_status: "Available" })
+    .populate("res_id")
     .then((foods) => {
       if (foods)
         res.send({
@@ -80,6 +186,7 @@ router.get("/all", async (req, res) => {
 router.get("/:id", async (req, res) => {
   await Food.findById(req.params.id)
     .populate("res_id")
+    .populate("ngo_id")
     .then((food) => {
       res.send({
         success: true,
@@ -124,7 +231,7 @@ router.get("/status/:id", async (req, res) => {
     });
 });
 
-router.post("/add", async (req, res) => {
+router.post("/", async (req, res) => {
   console.log("post req");
   const food = new Food(req.body);
   await food
@@ -159,6 +266,48 @@ router.put("/edit/:id", async (req, res) => {
       });
     })
     .catch((error) => {
+      res.send({
+        success: false,
+        massage: "Something went wrong while updating" || error.massage,
+      });
+    });
+});
+
+router.put("/pickuptime/:id", async (req, res) => {
+  console.log("put from Food req");
+  let dt = new Date(Date.now());
+  const time = dt.getHours() + ":" + dt.getMinutes();
+  await Food.findByIdAndUpdate(
+    req.params.id,
+    { pickup_time: time, food_status: "Delivered" },
+    {
+      new: true,
+      useFindAndModify: false,
+    }
+  )
+    .then((data) => {
+      Request.updateMany(
+        { food_id: req.params.id },
+        { request_status: "Delivered" },
+        { new: true, useFindAndModify: false }
+      )
+        .then((data) => {
+          res.send({
+            success: true,
+            massage: "Successfully Updated",
+            data: [data],
+          });
+        })
+        .catch((error) => {
+          console.log("error1", error);
+          res.send({
+            success: false,
+            massage: "Something went wrong while updating" || error.massage,
+          });
+        });
+    })
+    .catch((error) => {
+      console.log("error2", error);
       res.send({
         success: false,
         massage: "Something went wrong while updating" || error.massage,

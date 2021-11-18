@@ -3,7 +3,6 @@ const { Schema } = require("mongoose");
 const Restaurant = require("./restaurant");
 const moment = require("moment");
 const ngo = require("./ngo");
-const tomorrow = moment().add(1, "day").toDate();
 const foodSchema = new mongoose.Schema({
   res_id: {
     type: Schema.Types.ObjectId,
@@ -18,7 +17,7 @@ const foodSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  discription: {
+  description: {
     type: String,
     require: true,
   },
@@ -30,14 +29,28 @@ const foodSchema = new mongoose.Schema({
     type: Number,
     default: 5,
   },
-  status: {
+  food_status: {
     type: String,
     default: "Available",
   },
-  due_time: {
-    type: Date,
-    require: true,
-    default: tomorrow,
+  pickup_time: {
+    type: String,
+  },
+  requests: [
+    {
+      type: Schema.Types.ObjectId,
+      default: null,
+    },
+  ],
+  note: {
+    type: String,
+  },
+  pickup_address: {
+    type: String,
+    default: "Same as Restaurant's Address",
+  },
+  city: {
+    type: String,
   },
 });
 module.exports = Food = mongoose.model("Food", foodSchema);

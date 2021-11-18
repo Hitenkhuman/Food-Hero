@@ -7,18 +7,19 @@ const Restaurant = require("../models/restaurant");
 //const { Restaurant } = require("../models/models");
 const saltRounds = 10;
 router.get("/", async (req, res) => {
-  await Restaurant.find()
+  await Restaurant.find({ isVerified: true })
     .then((restaurants) => {
       if (restaurants.length > 0)
         res.send({
           success: true,
-          massae: "Data found",
+          massage: "Data found",
           data: restaurants,
         });
       else
         res.send({
           success: false,
           massage: "No restaurants are available in database",
+          data: null,
         });
     })
     .catch((error) => {
@@ -27,6 +28,7 @@ router.get("/", async (req, res) => {
         success: false,
         massage:
           error.massage || "Something went wrong while retrieving Restaurants",
+        data: null,
       });
     });
 });
@@ -36,7 +38,7 @@ router.get("/:id", async (req, res) => {
     .then((restaurants) => {
       res.send({
         success: true,
-        massae: "Data found",
+        massage: "Data found",
         data: restaurants,
       });
     })
@@ -46,6 +48,7 @@ router.get("/:id", async (req, res) => {
         massage:
           error.massage ||
           "Something went wrong while retrieving Restaurants please check restaurant id",
+        data: null,
       });
       console.log(error);
     });
@@ -56,15 +59,15 @@ router.get("/mobile/:mobile", async (req, res) => {
     .then((restaurant) => {
       if (restaurant)
         res.send({
-          code: 400,
-          status: "Occupied",
+          success: false,
           massage: "Try with diffrent number",
+          data: null,
         });
       else {
         res.send({
-          code: 100,
-          status: "Available",
-          massage: "Ok",
+          success: true,
+          massage: "Available",
+          data: null,
         });
       }
     })
@@ -74,6 +77,7 @@ router.get("/mobile/:mobile", async (req, res) => {
         massage:
           error.massage ||
           "Something went wrong while retrieving Restaurants please check restaurant id",
+        data: null,
       });
       console.log(error);
     });
@@ -84,15 +88,15 @@ router.get("/email/:emailid", async (req, res) => {
     .then((restaurant) => {
       if (restaurant)
         res.send({
-          code: 400,
-          status: "Occupied",
+          success: false,
           massage: "Try with diffrent email id",
+          data: null,
         });
       else {
         res.send({
-          code: 100,
-          status: "Available",
-          massage: "Ok",
+          success: true,
+          massage: "Available",
+          data: null,
         });
       }
     })
@@ -102,6 +106,7 @@ router.get("/email/:emailid", async (req, res) => {
         massage:
           error.massage ||
           "Something went wrong while retrieving Restaurants please check restaurant id",
+        data: null,
       });
       console.log(error);
     });
@@ -114,13 +119,14 @@ router.get("/device/all", async (req, res) => {
       if (restaurant) {
         res.send({
           success: true,
-          massae: "Data found",
-          data: restaurants,
+          massage: "Data found",
+          data: restaurant,
         });
       } else {
         res.status(100).json({
           success: false,
           massage: "Data not found",
+          data: null,
         });
       }
     })
@@ -130,6 +136,7 @@ router.get("/device/all", async (req, res) => {
         massage:
           error.massage ||
           "Something went wrong while retrieving token please check restaurant id",
+        data: null,
       });
       console.log(error);
     });
@@ -152,6 +159,7 @@ router.get("/device/:id", async (req, res) => {
         res.status(100).json({
           success: false,
           massage: "No Restaurant are available",
+          data: null,
         });
       }
     })
@@ -161,6 +169,7 @@ router.get("/device/:id", async (req, res) => {
         massage:
           error.massage ||
           "Something went wrong while retrieving token please check restaurant id",
+        data: null,
       });
       console.log(error);
     });
@@ -172,7 +181,7 @@ router.get("/profileimg/:id", async (req, res) => {
     .then((restaurants) => {
       res.send({
         success: true,
-        massae: "Data found",
+        massage: "Data found",
         data: {
           _id: restaurants._id,
           imgurl: config.img_path + restaurants.imgurl,
@@ -185,6 +194,7 @@ router.get("/profileimg/:id", async (req, res) => {
         massage:
           error.massage ||
           "Something went wrong while retrieving Restaurants please check restaurant id",
+        data: null,
       });
       console.log(error);
     });
@@ -206,6 +216,7 @@ router.post("/add", async (req, res) => {
         res.send({
           success: false,
           massage: "Issues with file",
+          data: null,
         });
     });
   }
@@ -219,13 +230,14 @@ router.post("/add", async (req, res) => {
       email: req.body.email,
       password: hash,
       imgurl: filename,
-      openingtime: req.body.openingtime,
-      closingtime: req.body.closingtime,
+      opening_time: req.body.opening_time,
+      closing_time: req.body.closing_time,
       state: req.body.state,
       district: req.body.district,
       address: req.body.address,
       devicetoken: req.body.devicetoken,
       authid: req.body.authid,
+      city: req.body.city,
     });
     restaurant
       .save()
@@ -239,8 +251,9 @@ router.post("/add", async (req, res) => {
       .catch((error) => {
         res.status(500).send({
           success: false,
-          message:
+          massage:
             error.message || "Some error occurred while adding the Restaurant.",
+          data: null,
         });
       });
   });
@@ -260,6 +273,7 @@ router.put("/profileimg/:id", async (req, res) => {
       res.send({
         success: false,
         massage: "Issues with file",
+        data: null,
       });
   });
 
@@ -275,6 +289,7 @@ router.put("/profileimg/:id", async (req, res) => {
       res.send({
         success: true,
         massage: "Successfully Updated",
+        data: null,
       });
     })
     .catch((error) => {
@@ -283,6 +298,7 @@ router.put("/profileimg/:id", async (req, res) => {
         massage:
           "Something went wrong while updating please check restaurant id" ||
           error.massage,
+        data: null,
       });
     });
 });
@@ -306,6 +322,7 @@ router.put("/edit/:id", async (req, res) => {
       res.send({
         success: true,
         massage: "Successfully Updated",
+        data: null,
       });
     })
     .catch((error) => {
@@ -314,6 +331,7 @@ router.put("/edit/:id", async (req, res) => {
         massage:
           "Something went wrong while updating please check restaurant id" ||
           error.massage,
+        data: null,
       });
     });
 });
@@ -335,6 +353,7 @@ router.put("/changepassword/:id", async (req, res) => {
         res.send({
           success: true,
           massage: "Successfully Updated",
+          data: null,
         });
       })
       .catch((error) => {
@@ -343,9 +362,38 @@ router.put("/changepassword/:id", async (req, res) => {
           massage:
             "Something went wrong while updating please check restaurant id" ||
             error.massage,
+          data: null,
         });
       });
   });
+});
+
+router.put("/reject/:id", async (req, res) => {
+  console.log("put from restaurant req");
+  await Restaurant.findByIdAndUpdate(
+    req.params.id,
+    { isVerified: false },
+    {
+      new: true,
+      useFindAndModify: false,
+    }
+  )
+    .then((restaurant) => {
+      res.send({
+        success: true,
+        massage: "Successfully Updated",
+        data: [restaurant],
+      });
+    })
+    .catch((error) => {
+      res.send({
+        success: false,
+        massage:
+          "Something went wrong while updating please check ngo id" ||
+          error.massage,
+        data: null,
+      });
+    });
 });
 router.post("/login", async (req, res) => {
   Restaurant.findOne({ mobile: req.body.mobile })
@@ -362,6 +410,7 @@ router.post("/login", async (req, res) => {
             res.send({
               success: false,
               massage: "Invalid password",
+              data: null,
             });
           }
         });
@@ -369,6 +418,7 @@ router.post("/login", async (req, res) => {
         res.send({
           success: false,
           massage: "Please Signin first",
+          data: null,
         });
       }
     })
@@ -384,6 +434,7 @@ router.delete("/:id", (req, res) => {
       res.send({
         success: true,
         massage: "Successfully Deleted",
+        data: null,
       });
     })
     .catch((error) => {
@@ -392,6 +443,7 @@ router.delete("/:id", (req, res) => {
         massage:
           "Something went wrong while deleting please check restaurant id" ||
           error.massage,
+        data: null,
       });
     });
 });
