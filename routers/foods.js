@@ -213,7 +213,7 @@ router.get("/ngo/:id/:city", async (req, res) => {
 });
 
 router.get("/restaurant/:id", async (req, res) => {
-  console.log("ngo req");
+  console.log("checking for food");
   await Food.find({ res_id: req.params.id, food_status: "Available" })
     .populate("res_id")
     .then((foods) => {

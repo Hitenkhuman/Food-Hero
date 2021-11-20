@@ -483,6 +483,7 @@ router.put("/reject/:id", async (req, res) => {
 // });
 
 router.post("/login", async (req, res) => {
+  console.log(req.body);
   Restaurant.findOne({ mobile: req.body.mobile })
     .then((data) => {
       if (data) {
