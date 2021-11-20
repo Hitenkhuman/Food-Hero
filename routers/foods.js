@@ -101,9 +101,61 @@ router.get("/available/:city", async (req, res) => {
 //     });
 // });
 
-router.get("/all", async (req, res) => {
+router.get("/history", async (req, res) => {
   console.log("all req");
   await Food.find({ food_status: "Delivered" })
+    .populate("res_id")
+    .populate("ngo_id")
+    .then((foods) => {
+      if (foods) {
+        res.send({
+          success: true,
+          massage: "Data Found",
+          data: foods,
+        });
+      } else
+        res.status(100).send({
+          success: false,
+          massage: "No Foods are available in database",
+        });
+    })
+    .catch((error) => {
+      res.status(500).send({
+        success: false,
+        massage: error.massage || "Something went wrong while retrieving Foods",
+      });
+    });
+});
+
+router.get("/history/ngo/:id", async (req, res) => {
+  console.log("history req");
+  await Food.find({ ngo_id: req.params.id, food_status: "Delivered" })
+    .populate("res_id")
+    .populate("ngo_id")
+    .then((foods) => {
+      if (foods) {
+        res.send({
+          success: true,
+          massage: "Data Found",
+          data: foods,
+        });
+      } else
+        res.status(100).send({
+          success: false,
+          massage: "No Foods are available in database",
+        });
+    })
+    .catch((error) => {
+      res.status(500).send({
+        success: false,
+        massage: error.massage || "Something went wrong while retrieving Foods",
+      });
+    });
+});
+
+router.get("/history/restaurant/:id", async (req, res) => {
+  console.log("history req");
+  await Food.find({ res_id: req.params.id, food_status: "Delivered" })
     .populate("res_id")
     .populate("ngo_id")
     .then((foods) => {
@@ -130,7 +182,7 @@ router.get("/all", async (req, res) => {
 router.get("/ngo/:id/:city", async (req, res) => {
   console.log("ngo req");
   await Food.find({
-    ngo_id: req.params.id,
+    //ngo_id: req.params.id,
     food_status: "Available",
     city: req.params.city,
     requests: { $ne: req.params.id },
@@ -148,12 +200,14 @@ router.get("/ngo/:id/:city", async (req, res) => {
         res.status(100).send({
           success: false,
           massage: "No Foods are available in database",
+          data: null,
         });
     })
     .catch((error) => {
       res.status(500).send({
         success: false,
         massage: error.massage || "Something went wrong while retrieving Foods",
+        data: null,
       });
     });
 });
@@ -240,7 +294,7 @@ router.post("/", async (req, res) => {
       res.send({
         success: true,
         massage: "Successfully Inserted",
-        data: data,
+        data: [data],
       });
     })
     .catch((error) => {

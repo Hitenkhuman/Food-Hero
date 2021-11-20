@@ -116,7 +116,7 @@ router.post("/add", async (req, res) => {
       Food.findByIdAndUpdate(
         { _id: req.body.food_id },
         {
-          $push: { requests: data._id },
+          $push: { requests: data.ngo_id },
         },
         { useFindAndModify: false }
       )
