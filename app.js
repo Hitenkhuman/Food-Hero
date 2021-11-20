@@ -37,6 +37,9 @@ app.use("/foods", foodRouter);
 const requestRouter = require("./routers/requests");
 app.use("/requests", requestRouter);
 
+const adminRouter = require("./routers/admin");
+app.use("/admin", adminRouter);
+
 app.listen(9000, () => {
   console.log("running on server");
 });

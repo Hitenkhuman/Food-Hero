@@ -513,56 +513,82 @@ router.put("/reject/:id", async (req, res) => {
 
 router.put("/changepassword/:id", async (req, res) => {
   console.log("put from restuaranrt req");
-  bcrypt.hash(req.body.password, saltRounds, (error, hash) => {
-    if (error) {
-      return res.send(error);
+
+  Ngo.findByIdAndUpdate(
+    req.params.id,
+    { password: req.body.password },
+    {
+      new: true,
+      useFindAndModify: false,
     }
-    Ngo.findByIdAndUpdate(
-      req.params.id,
-      { password: hash },
-      {
-        new: true,
-        useFindAndModify: false,
-      }
-    )
-      .then((data) => {
-        res.send({
-          success: true,
-          massage: "Successfully Updated",
-          data: null,
-        });
-      })
-      .catch((error) => {
-        res.send({
-          success: false,
-          massage:
-            "Something went wrong while updating please check restaurant id" ||
-            error.massage,
-          data: null,
-        });
+  )
+    .then((data) => {
+      res.send({
+        success: true,
+        massage: "Successfully Updated",
+        data: data,
       });
-  });
+    })
+    .catch((error) => {
+      res.send({
+        success: false,
+        massage:
+          "Something went wrong while updating please check restaurant id" ||
+          error.massage,
+        data: null,
+      });
+    });
 });
+
+// router.post("/login", async (req, res) => {
+//   Ngo.findOne({ mobile: req.body.mobile })
+//     .then((data) => {
+//       if (data) {
+//         bcrypt.compare(req.body.password, data.password, (err, result) => {
+//           if (result) {
+//             res.send({
+//               success: true,
+//               massage: "Login successful",
+//               data: data,
+//             });
+//           } else {
+//             res.send({
+//               success: false,
+//               massage: "Invalid password",
+//               data: null,
+//             });
+//           }
+//         });
+//       } else {
+//         res.send({
+//           success: false,
+//           massage: "Please Signin first",
+//           data: null,
+//         });
+//       }
+//     })
+//     .catch((error) => {
+//       console.log(error);
+//     });
+// });
 
 router.post("/login", async (req, res) => {
   Ngo.findOne({ mobile: req.body.mobile })
     .then((data) => {
       if (data) {
-        bcrypt.compare(req.body.password, data.password, (err, result) => {
-          if (result) {
-            res.send({
-              success: true,
-              massage: "Login successful",
-              data: data,
-            });
-          } else {
-            res.send({
-              success: false,
-              massage: "Invalid password",
-              data: null,
-            });
-          }
-        });
+        if (data.password == req.body.password) {
+          res.send({
+            success: true,
+            massage: "Login successful",
+            data: [data],
+          });
+        } else {
+          res.send({
+            success: false,
+            massage: "Invalid password",
+            data: null,
+          });
+        }
       } else {
         res.send({
           success: false,
