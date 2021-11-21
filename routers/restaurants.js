@@ -318,6 +318,67 @@ router.post("/add", async (req, res) => {
     });
 });
 
+router.post("/edit", async (req, res) => {
+  console.log("post edit req");
+  let filename = "";
+  if (req.files.img != null) {
+    if (!req.files || Object.keys(req.files).length === 0) {
+      filename = req.body.email + "_profile_pic_" + "default.jpg";
+    } else {
+      const target_file = req.files.img;
+      filename = req.body.email + "_profile_pic_" + target_file.name;
+      const uploadPath = "./static/profile_pic/" + filename;
+      target_file.mv(uploadPath, (err) => {
+        if (err) {
+          console.log(err);
+          res.send({
+            success: false,
+            massage: "Issue with file try again",
+            data: err,
+          });
+        }
+      });
+    }
+  } else {
+    filename = req.body.email + "_profile_pic_" + "default.jpg";
+  }
+  await Restaurant.findByIdAndUpdate(
+    req.body.id,
+    {
+      name: req.body.name,
+      email: req.body.email,
+      imgurl: filename,
+      opening_time: req.body.opening_time,
+      closing_time: req.body.closing_time,
+      state: req.body.state,
+      district: req.body.district,
+      address: req.body.address,
+      city: req.body.city,
+    },
+    {
+      new: true,
+      useFindAndModify: false,
+    }
+  )
+    .then((resta) => {
+      res.send({
+        success: true,
+        massage: "Successfully Updated",
+        data: [resta],
+      });
+    })
+    .catch((error) => {
+      console.log("test", error);
+      res.send({
+        success: false,
+        massage:
+          "Something went wrong while updating please check restaurant id" ||
+          error.massage,
+        data: null,
+      });
+    });
+});
+
 router.put("/profileimg/:id", async (req, res) => {
   console.log("put from restuaranrt req");
   if (!req.files || Object.keys(req.files).length === 0) {
@@ -394,11 +455,11 @@ router.put("/edit/:id", async (req, res) => {
       });
     });
 });
-router.put("/changepassword/:id", async (req, res) => {
+router.post("/changepassword/", async (req, res) => {
   console.log("put from restuaranrt req");
 
   Restaurant.findByIdAndUpdate(
-    req.params.id,
+    req.body.id,
     { password: req.body.password },
     {
       new: true,
@@ -409,7 +470,7 @@ router.put("/changepassword/:id", async (req, res) => {
       res.send({
         success: true,
         massage: "Successfully Updated",
-        data: data,
+        data: [data],
       });
     })
     .catch((error) => {

@@ -3,7 +3,7 @@ const router = express.Router();
 const Admin = require("../models/admin");
 
 router.post("/login", async (req, res) => {
-  Admin.findOne({ mobile: req.body.email })
+  Admin.findOne({ email: req.body.email })
     .then((data) => {
       if (data) {
         if (data.password == req.body.password) {
@@ -32,11 +32,11 @@ router.post("/login", async (req, res) => {
     });
 });
 
-router.put("/changepassword/:id", async (req, res) => {
+router.post("/changepassword/:id", async (req, res) => {
   console.log("put from admin req");
 
   Admin.findByIdAndUpdate(
-    req.params.id,
+    req.body.id,
     { password: req.body.password },
     {
       new: true,

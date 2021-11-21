@@ -242,31 +242,6 @@ router.get("/status/:id", async (req, res) => {
     });
 });
 
-router.get("/profileimg/:id", async (req, res) => {
-  await Restaurant.findById(req.params.id)
-    .select({ imgurl: 1 })
-    .then((ngos) => {
-      res.send({
-        success: true,
-        massage: "Data found",
-        data: {
-          _id: ngos._id,
-          imgurl: config.img_path + ngos.imgurl,
-        },
-      });
-    })
-    .catch((error) => {
-      res.status(500).send({
-        success: false,
-        massage:
-          error.massage ||
-          "Something went wrong while retrieving Restaurants please check restaurant id",
-        data: null,
-      });
-      console.log(error);
-    });
-});
-
 // router.post("/add", async (req, res) => {
 //   console.log("post req");
 //   let filename = "";
@@ -382,6 +357,67 @@ router.post("/add", async (req, res) => {
         success: false,
         massage:
           error.message || "Some error occurred while adding the Restaurant.",
+        data: null,
+      });
+    });
+});
+
+router.post("/edit", async (req, res) => {
+  console.log("post edit req ngo");
+  let filename = "";
+  if (req.files.img != null) {
+    if (!req.files || Object.keys(req.files).length === 0) {
+      filename = req.body.email + "_profile_pic_" + "default.jpg";
+    } else {
+      const target_file = req.files.img;
+      filename = req.body.email + "_profile_pic_" + target_file.name;
+      const uploadPath = "./static/profile_pic/" + filename;
+      target_file.mv(uploadPath, (err) => {
+        if (err) {
+          console.log(err);
+          res.send({
+            success: false,
+            massage: "Issue with file try again",
+            data: err,
+          });
+        }
+      });
+    }
+  } else {
+    filename = req.body.email + "_profile_pic_" + "default.jpg";
+  }
+  await Ngo.findByIdAndUpdate(
+    req.body.id,
+    {
+      name: req.body.name,
+      email: req.body.email,
+      imgurl: filename,
+      opening_time: req.body.opening_time,
+      closing_time: req.body.closing_time,
+      state: req.body.state,
+      district: req.body.district,
+      address: req.body.address,
+      city: req.body.city,
+    },
+    {
+      new: true,
+      useFindAndModify: false,
+    }
+  )
+    .then((ngo) => {
+      res.send({
+        success: true,
+        massage: "Successfully Updated",
+        data: [ngo],
+      });
+    })
+    .catch((error) => {
+      console.log("test", error);
+      res.send({
+        success: false,
+        massage:
+          "Something went wrong while updating please check your details" ||
+          error.massage,
         data: null,
       });
     });
@@ -511,11 +547,11 @@ router.put("/reject/:id", async (req, res) => {
     });
 });
 
-router.put("/changepassword/:id", async (req, res) => {
+router.post("/changepassword/", async (req, res) => {
   console.log("put from restuaranrt req");
 
   Ngo.findByIdAndUpdate(
-    req.params.id,
+    req.body.id,
     { password: req.body.password },
     {
       new: true,
@@ -526,7 +562,7 @@ router.put("/changepassword/:id", async (req, res) => {
       res.send({
         success: true,
         massage: "Successfully Updated",
-        data: data,
+        data: [data],
       });
     })
     .catch((error) => {
