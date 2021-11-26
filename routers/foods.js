@@ -217,20 +217,16 @@ router.get("/restaurant/:id", async (req, res) => {
   await Food.find({ res_id: req.params.id, food_status: "Available" })
     .populate("res_id")
     .then((foods) => {
-      if (foods.length)
-        res.send({
-          success: true,
-          massage: "Data Found",
-          data: foods,
-        });
-      else
-        res.status(100).send({
-          success: false,
-          massage: "No Foods are available in database",
-          data: null,
-        });
+      console.log(foods);
+
+      res.send({
+        success: true,
+        massage: "Data Found",
+        data: foods,
+      });
     })
     .catch((error) => {
+      console.log(error);
       res.status(500).send({
         success: false,
         massage: error.massage || "Something went wrong while retrieving Foods",
