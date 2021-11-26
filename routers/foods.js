@@ -217,7 +217,7 @@ router.get("/restaurant/:id", async (req, res) => {
   await Food.find({ res_id: req.params.id, food_status: "Available" })
     .populate("res_id")
     .then((foods) => {
-      if (foods)
+      if (foods.length)
         res.send({
           success: true,
           massage: "Data Found",
@@ -227,6 +227,7 @@ router.get("/restaurant/:id", async (req, res) => {
         res.status(100).send({
           success: false,
           massage: "No Foods are available in database",
+          data: null,
         });
     })
     .catch((error) => {

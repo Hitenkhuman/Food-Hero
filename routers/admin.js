@@ -32,7 +32,7 @@ router.post("/login", async (req, res) => {
     });
 });
 
-router.post("/changepassword/:id", async (req, res) => {
+router.post("/changepassword", async (req, res) => {
   console.log("put from admin req");
 
   Admin.findByIdAndUpdate(
@@ -47,7 +47,7 @@ router.post("/changepassword/:id", async (req, res) => {
       res.send({
         success: true,
         massage: "Successfully Updated",
-        data: data,
+        data: [data],
       });
     })
     .catch((error) => {

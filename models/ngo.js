@@ -53,8 +53,6 @@ const ngoSchema = new mongoose.Schema({
   },
   devicetoken: {
     type: String,
-    require: true,
-    unique: true,
   },
   authid: {
     type: String,
